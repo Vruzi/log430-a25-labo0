@@ -17,6 +17,7 @@ def test_addition():
 
 def test_subtract():
     my_calculator = Calculator()
+    assert my_calculator.subtraction(3, 6) == -3
     assert my_calculator.subtraction(5, 3) == 2
 
 def test_multiply():
