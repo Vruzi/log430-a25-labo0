@@ -1,12 +1,16 @@
 name: example_CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout dépot
+      - name: Checkout dépôt
         uses: actions/checkout@v4
 
       - name: Installer Python
@@ -19,13 +23,14 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install pytest
+
       - name: Lancer les tests
         working-directory: src
         run: python -m pytest -q
 
   deploy:
     needs: build
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Déploiement via SSH sur la VM
