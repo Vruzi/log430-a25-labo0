@@ -32,6 +32,7 @@ jobs:
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    environment: dev
     steps:
       - name: Déploiement via SSH sur la VM
         uses: appleboy/ssh-action@v1.1.0
