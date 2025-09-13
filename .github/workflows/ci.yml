@@ -22,9 +22,8 @@ jobs:
       - name: Lancer les tests
         working-directory: src
         run: python -m pytest -q
-
   deploy:
-    needs: ci
+    needs: build
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
