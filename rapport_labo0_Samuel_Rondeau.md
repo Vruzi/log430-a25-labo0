@@ -112,6 +112,38 @@ Gitlab éxecutera les tests dans son serveur, et ils devront passer également s
 
 > 💡 **Question 2** :  Que fait GitLab pendant les étapes de « setup » et « checkout » ? Veuillez inclure la sortie du terminal Gitlab CI dans votre réponse.
 
+Voici les logs lors du setup:
+-Current runner version: '2.328.0'
+-Runner Image Provisioner
+-Operating System
+-Runner Image
+-GITHUB_TOKEN Permissions
+-Secret source: Actions
+-Prepare workflow directory
+-Prepare all required actions
+-Getting action download info
+-Download action repository 'actions/checkout@v3' (SHA:f43a0e5ff2bd294095638e18286ca9a3d1956744)
+-Download action repository 'actions/setup-python@v4' (SHA:7f4fc3e22c37d6ff65e88745f38bd3157c663f7c)
+-Complete job name: build
+
+et voici les logs lors du ckecout:
+
+-Run actions/checkout@v3
+-Syncing repository: Vruzi/log430-a25-labo0
+-Getting Git version info
+-Temporarily overriding HOME='/home/runner/work/_temp/978a14cb-3059-4225-b952-97cecf959e78' before making global git config changes
+-Adding repository directory to the temporary git global config as a safe directory
+-/usr/bin/git config --global --add safe.directory /home/runner/work/log430-a25-labo0/log430-a25-labo0
+-Deleting the contents of '/home/runner/work/log430-a25-labo0/log430-a25-labo0'
+-Initializing the repository
+-Disabling automatic garbage collection
+-Setting up auth
+-Fetching the repository
+-Determining the checkout info
+-Checking out the ref
+-/usr/bin/git log -1 --format='%H'
+-'bb0ff710b682cc63d7e28634f57eaa0f622862bf'
+
 ### 4. Automatiser déploiement continu (CD)
 Après l’exécution des tests, déployez l’application dans un serveur ou machine virtuelle via SSH manuellement:
 
@@ -141,6 +173,35 @@ GitHub:
 
 
 > 💡 **Question 3** : Quel approache et quelles commandes avez-vous exécutées pour automatiser le déploiement continu de l'application dans la machine virtuelle ? Veuillez inclure les sorties du terminal et les scripts bash dans votre réponse.
+
+Dans la VM j'ai créer un exécute deploy.sh avec les commande bash afin d'automatisé le déploiement. 
+Voici le code de deploy.sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+APP_DIR="$HOME/log430-a25-labo0"
+
+echo "[DEPLOY] start $(date -Is)"
+
+cd "$APP_DIR"
+
+echo "[DEPLOY] fetch/pull main"
+git fetch --all --prune
+git checkout main
+git pull --rebase --autostash origin main
+
+echo "[DEPLOY] docker compose build"
+docker compose build --pull
+
+echo "[DEPLOY] docker compose up -d"
+docker compose up -d
+
+echo "[DEPLOY] prune old images"
+docker image prune -f || true
+
+echo "[DEPLOY] done $(date -Is)"
+
+Ce que ce script fait c'est que dans la VM il met à jour la branch main, rebuild l'image docker et démarre le conteneur. Il fini avec le nettoiement des images qui n'ont pas de tag afin d'évité des images inutile. Aussi il y a quelque log ajouter avec le timestamp.
 
 Quelques commandes utiles pour vérifier l’état des ressources :
 ```bash

@@ -22,7 +22,7 @@ jobs:
       - name: Lancer les tests
         working-directory: src
         run: python -m pytest -q
-        
+
   deploy:
     needs: build
     if: github.ref == 'refs/heads/main'
@@ -34,6 +34,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             cd /home/${{ secrets.SSH_USER }}/log430-a25-labo0 || cd ~/log430-a25-labo0
             chmod +x ./deploy.sh
