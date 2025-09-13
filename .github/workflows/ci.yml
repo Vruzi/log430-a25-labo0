@@ -5,19 +5,36 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout dépot
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Installer Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.13"
 
-      - name: Installer les dépendances
+      - name: Installer les dépendances (si requirements.txt existe)
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install pytest
+      - name: Lancer les tests
+        working-directory: src
+        run: python -m pytest -q
 
+deploy:
+  needs: ci
+  if: github.ref == 'refs/heads/main'
+  runs-on: ubuntu-latest
+  steps:
+    - name: Déploiement via SSH sur la VM
+      uses: appleboy/ssh-action@v1.1.0
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd /home/${{ secrets.SSH_USER }}/log430-a25-labo0 || cd ~/log430-a25-labo0
+          chmod +x ./deploy.sh
+          ./deploy.sh
